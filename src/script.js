@@ -8,14 +8,12 @@ if (!code) { //if we don't have an access code, then redirect to grant access
     const accessToken = await getAccessToken(clientId, code);
     const profile = await fetchProfile(accessToken);
     const playlists = await fetchPlaylists(accessToken); //not used
+    console.log(accessToken);
     populateUI(profile, playlists);
-    showOriginalContent();
+
 }
 
-function showOriginalContent(){
-    console.log(accessToken);
-}
-//idk what this does 
+//sends the user to the "auth" spotify page before redirecting back
 async function redirectToAuthCodeFlow(clientId) {
     const verifier = generateCodeVerifier(128);
     const challenge = await generateCodeChallenge(verifier);
@@ -76,7 +74,7 @@ async function fetchProfile(token) {
     const result = await fetch("https://api.spotify.com/v1/me", {
         method: "GET", headers: { Authorization: `Bearer ${token}` }
     });
-    console.log(result.total);
+    console.log(result);
     return await result.json();
 }
 //gets playlist information
@@ -110,8 +108,26 @@ async function populatePlaylists(playlists) {
     }
     return true;
 }
+// async function toggleContent(){
+//     document.getElementById("")
+// }
+export function loadUserInfo(){
+    console.log('loading!!!');
+    if (!code) { //if we don't have an access code, then redirect to grant access
+        redirectToAuthCodeFlow(clientId);
+    } else { //if we already got access during this session, then 
+        const accessToken =  getAccessToken(clientId, code);
+        const profile =  fetchProfile(accessToken);
+        const playlists =  fetchPlaylists(accessToken); //not used
+        populateUI(profile, playlists);
+
+    }
+
+}
 //populates the information on the website with the info we found thru the async stuff... again postPlaylists should be more modular
 function populateUI(profile, playlists) {
+    console.log(profile);
+    console.log(playlists);
     document.getElementById("displayName").innerText = profile.display_name;
     if (profile.images[0]) { //if the image exists, show it
         const profileImage = new Image(200, 200);

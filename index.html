@@ -10,16 +10,17 @@
 <body>
     <h1>Spotify Stats</h1>
     <button id="toggleContentButton">Toggle Content</button>
-    <div id="contentArea" class="content"> <!-- original content -->
-        This is the original content
+    <div id="contentArea" class="content">
+        <!-- original content -->
+        Loading...
     </div>
-    <!-- Reference the external JavaScript file -->
-    <script src="script.js"></script>
+
     <script>
-        document.getElementById('toggleContentButton').addEventListener('click', () => {
+        console.log("imprinted");
+        document.addEventListener('DOMContentLoaded', () => {
             const contentArea = document.getElementById('contentArea');
-            const button = document.getElementById('toggleContentButton');
-            const originalContent = `        
+                const button = document.getElementById('toggleContentButton');
+                const originalContent = `        
             <h1>Display your Spotify profile data</h1>
             <section id="profile">
             <h2>Logged in as <span id="displayName"></span></h2>
@@ -34,7 +35,7 @@
             </ul>
             </section>
         `;
-            const newContent = `
+                const newContent = `
             <h1>Your Playlists</h1>
             <section id="playlist">
             <ol>
@@ -43,19 +44,22 @@
                 </ol>
             </section>
             `;
+            contentArea.innerHTML = originalContent;
+            document.getElementById('toggleContentButton').addEventListener('click', () => {
 
-
-            // Toggle between the original and new content 
-            if (contentArea.innerHTML === originalContent) {
-                contentArea.innerHTML = newContent;
-                button.textContent = 'Return';
-            }
-            else {
-                contentArea.innerHTML = originalContent;
-                // Call specific functions from the external script 
-                document.getElementById('toggleContentButton').addEventListener('click', toggleContent);
-                button.textContent = 'View Playlists';
-            }
+                // Toggle between the original and new content 
+                if (contentArea.innerHTML.trim() === originalContent.trim()) {
+                    contentArea.innerHTML = newContent;
+                    button.textContent = 'Return';
+                }
+                else {
+                    contentArea.innerHTML = originalContent;
+                    // Call specific functions from the external script 
+                    loadUserInfo();
+                    button.textContent = 'View Playlists';
+                }
+                console.log("toggled??");
+            });
         });
     </script>
 </body>
