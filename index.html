@@ -1,24 +1,63 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="utf-8">
-        <title>My Spotify Profile</title>
-        <script src="src/script.js" type="module"></script>
-    </head>
-    <body>
-      <h1>Display your Spotify profile data</h1>
 
-      <section id="profile">
-      <h2>Logged in as <span id="displayName"></span></h2>
-      <span id="avatar"></span>
-      <ul>
-          <li>User ID: <span id="id"></span></li>
-          <!-- <li>Email: <span id="email"></span></li> -->
-          <li>Spotify URI: <a id="uri" href="#"></a></li>
-          <li>Link: <a id="url" href="#"></a></li>
-          <li>Profile Image: <span id="imgUrl"></span></li>
-          <li>Playlists: <ol><span id="playlists"></span></ol></li>
-      </ul>
-      </section>
-    </body>
+<head>
+    <meta charset="utf-8">
+    <title>My Spotify Profile</title>
+    <script src="src/script.js" type="module"></script>
+</head>
+
+<body>
+    <h1>Spotify Stats</h1>
+    <button id="toggleContentButton">Toggle Content</button>
+    <div id="contentArea" class="content"> <!-- original content -->
+        This is the original content
+    </div>
+    <!-- Reference the external JavaScript file -->
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('toggleContentButton').addEventListener('click', () => {
+            const contentArea = document.getElementById('contentArea');
+            const button = document.getElementById('toggleContentButton');
+            const originalContent = `        
+            <h1>Display your Spotify profile data</h1>
+            <section id="profile">
+            <h2>Logged in as <span id="displayName"></span></h2>
+            <span id="avatar"></span>
+            <ul>
+                <li>User ID: <span id="id"></span></li>
+                <li>Spotify URI: <a id="uri" href="#"></a></li>
+                <li>Link: <a id="url" href="#"></a></li>
+                <li>Profile Image: <span id="imgUrl"></span></li>
+                <li>Playlists: <ol><span id="playlists"></span></ol>
+                </li>
+            </ul>
+            </section>
+        `;
+            const newContent = `
+            <h1>Your Playlists</h1>
+            <section id="playlist">
+            <ol>
+                <li>testing123</li>
+                <li>testing456</li>
+                </ol>
+            </section>
+            `;
+
+
+            // Toggle between the original and new content 
+            if (contentArea.innerHTML === originalContent) {
+                contentArea.innerHTML = newContent;
+                button.textContent = 'Return';
+            }
+            else {
+                contentArea.innerHTML = originalContent;
+                // Call specific functions from the external script 
+                document.getElementById('toggleContentButton').addEventListener('click', toggleContent);
+                button.textContent = 'View Playlists';
+            }
+        });
+    </script>
+</body>
+
 </html>
