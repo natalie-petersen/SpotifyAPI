@@ -4,68 +4,52 @@
 <head>
     <meta charset="utf-8">
     <title>My Spotify Profile</title>
-    <script src="src/script.js" type="module"></script>
+
+    <script>
+        function loadContent(page) {
+            fetch(page)
+                .then(response => response.text())
+                .then(html => {
+                    const newContent = document.getElementById('contentArea');
+                    newContent.innerHTML = html;
+                    console.log('Content loaded:', newContent.innerHTML);
+                
+                const startupScripts = newContent.querySelectorAll('script[data-execute="start"]');
+                console.log('scripts are '+ startupScripts.length);
+                for(let script of startupScripts){
+                    console.log('Executing script:', script.innterText);
+                    import('./src/script.js').then(module=> {
+                        eval(script.innerText.replace('loadUserInfo()', 'module.loadUserInfo()'));
+                    }).catch(error => console.error('error loading module: ', error))
+                }
+            })
+                .catch(error => console.error('Error loading page:', error));
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadContent('home.html');
+        })
+            } 
+    </script>
 </head>
 
 <body>
     <h1>Spotify Stats</h1>
-    <button id="toggleContentButton">Toggle Content</button>
+    <nav>
+        <button onclick="loadContent('home.html')">Home</button>
+        <button onclick="loadContent('playlist.html')">View Recent Playlists</button>
+        <button onclick="loadContent('track.html')">View Top Tracks</button>
+    </nav>
     <div id="contentArea" class="content">
-        <!-- loading screen !-->
-        Loading...
-    </div>
-
-    <script type="module">
+         <!-- loading screen  -->
+        waiting for something to happen?
+     </div> 
+<!-- 
+     <script type="module">
         import * as Script from './src/script.js';
-        var inTab;
-        // document.addEventListener('DOMContentLoaded', () => {
-            const contentArea = document.getElementById('contentArea');
-                const button = document.getElementById('toggleContentButton');
-                const originalContent = `        
-            <h1>Display your Spotify profile data</h1>
-            <section id="profile">
-            <h2>Logged in as <span id="displayName"></span></h2>
-            <span id="avatar"></span>
-            <ul>
-                <li>User ID: <span id="id"></span></li>
-                <li>Spotify URI: <a id="uri" href="#"></a></li>
-                <li>Link: <a id="url" href="#"></a></li>
-                <li>Profile Image: <span id="imgUrl"></span></li>
-                </li>
-            </ul>
-            </section>
-        `;
-                const newContent = `
-            <h1>Your Playlists</h1>
-            <section id="playlist">
-            <ol>
-                <li>testing123</li>
-                <li>testing456</li>
-                </ol>
-            </section>
-            `;
-            contentArea.innerHTML = originalContent;
-            Script.loadUserInfo();
-            console.log("supposedly set content area");
-            document.getElementById('toggleContentButton').addEventListener('click', () => {
+        Script.loadUserInfo();
+        console.log("supposedly set content area");
 
-                // Toggle between the original and new content 
-                if (inTab) {
-                    contentArea.innerHTML = newContent;
-                    button.textContent = 'Return';
-                    inTab = false;
-                }
-                else {
-                    contentArea.innerHTML = originalContent;
-                    // Call specific functions from the external script 
-                    Script.loadUserInfo();
-                    button.textContent = 'View Playlists';
-                    inTab = true;
-                }
-                console.log("toggled");
-            });
-        // });
-    </script>
+    </script> -->
 </body>
 
 </html>

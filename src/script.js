@@ -33,7 +33,7 @@ async function redirectToAuthCodeFlow(clientId) {
     params.append("scope", "user-read-private user-read-email playlist-read-private");
     params.append("code_challenge_method", "S256");
     params.append("code_challenge", challenge);
-    //params.append("show_dialog", false);
+    params.append("show_dialog", false);
 
     document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
@@ -101,7 +101,7 @@ async function populatePlaylists(playlists) {
         .filter(item => item !== null && item.name) //filters out deleted playlists and no-named playlists
         .map(item => item.name); //creates the array of names
 
-    const ol = document.getElementById("playlists"); //creates a new ordered list entry
+    const ol = document.getElementById("playlist"); //creates a new ordered list entry
     try {
         titles.forEach(name => {
             const li = document.createElement("li");
@@ -121,21 +121,33 @@ async function populatePlaylists(playlists) {
 //     document.getElementById("")
 // }
 export async function loadUserInfo() {
-    if(!accessToken){
+    if(!accessToken){ //regenerates the access token if it can't find it
         accessToken = await initializeToken();
     }
     console.log('loading!!!');
     console.log('I can see the token see look:' + accessToken + "and code too" + code);
+    if(!profile){
+        console.log("grabbing profile info");
     profile = await fetchProfile(accessToken);
+    }
     //playlists = await fetchPlaylists(accessToken); //not used
 
-    populateUI(profile, playlists);
+    populateUI(profile);
 
 }
+export async function loadPlaylistInfo() {
+    if(!accessToken){ //regenerates the access token if it can't find it
+        accessToken = await initializeToken();
+    }
+    if(!playlists){
+    playlists = await fetchPlaylists(accessToken);
+    }
+    populatePlaylists(playlists);
+}
+
 //populates the information on the website with the info we found thru the async stuff... again postPlaylists should be more modular
-async function populateUI(profile, playlists) {
+async function populateUI(profile) {
     console.log(profile);
-    console.log(playlists);
     document.getElementById("displayName").innerText = profile.display_name;
     if (profile.images[0]) { //if the image exists, show it
         const profileImage = new Image(200, 200);
