@@ -13,22 +13,35 @@
                     const newContent = document.getElementById('contentArea');
                     newContent.innerHTML = html;
                     console.log('Content loaded:', newContent.innerHTML);
-                
-                const startupScripts = newContent.querySelectorAll('script[data-execute="start"]');
-                console.log('scripts are '+ startupScripts.length);
-                for(let script of startupScripts){
-                    console.log('Executing script:', script.innterText);
-                    import('./src/script.js').then(module=> {
-                        eval(script.innerText.replace('loadUserInfo()', 'module.loadUserInfo()'));
-                    }).catch(error => console.error('error loading module: ', error))
-                }
-            })
+
+                    const startupScripts = newContent.querySelectorAll('script[data-execute="start"]');
+                    console.log('scripts are ' + startupScripts.length);
+
+                    for (let script of startupScripts) {
+                        const functionName = script.getAttribute('data-function'); // Extract function name from attribute listed in script tag (ie, loadUserInfo in home.html)
+                        if (functionName) {
+                            console.log('Executing script:', script.innerText);
+                            import('./src/script.js').then(module => {
+                                if (module[functionName]) {
+                                    module[functionName](); // Call the function dynamically from the module
+                                } else {
+                                    console.error(`Function "${functionName}" not found in module.`);
+                                }
+                                //eval(script.innerText.replace('loadUserInfo()', 'module.loadUserInfo()'));
+                            }).catch(error => console.error('error loading module: ', error))
+                        }
+                        else {
+                            console.warn('No function specified for script:', script.innerText);
+                        }
+                    }
+
+                })
                 .catch(error => console.error('Error loading page:', error));
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            loadContent('home.html');
-        })
-            } 
+
+            document.addEventListener('DOMContentLoaded', () => {
+                loadContent('home.html');
+            })
+        } 
     </script>
 </head>
 
@@ -40,10 +53,10 @@
         <button onclick="loadContent('track.html')">View Top Tracks</button>
     </nav>
     <div id="contentArea" class="content">
-         <!-- loading screen  -->
+        <!-- loading screen  -->
         waiting for something to happen?
-     </div> 
-<!-- 
+    </div>
+    <!-- 
      <script type="module">
         import * as Script from './src/script.js';
         Script.loadUserInfo();

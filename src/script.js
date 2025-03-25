@@ -1,6 +1,7 @@
 const clientId = "a248a13da1d245c6a2d576d6809e3c88";
 const params = new URLSearchParams(window.location.search); //???
 const code = params.get('code');
+const uri = "http://127.0.0.1:5173/"; //TODO: figure out why this isn't the usual /callback URL??? the port number was fixed in settings.json and the spotify API
 //const refreshCode = l;
 var profile;
 var playlists;
@@ -29,12 +30,12 @@ async function redirectToAuthCodeFlow(clientId) {
     const params = new URLSearchParams();
     params.append("client_id", clientId);
     params.append("response_type", "code");
-    params.append("redirect_uri", "http://localhost:5173/callback");
+    params.append("redirect_uri", uri);
     params.append("scope", "user-read-private user-read-email playlist-read-private");
     params.append("code_challenge_method", "S256");
     params.append("code_challenge", challenge);
     params.append("show_dialog", false);
-
+    console.log(params);
     document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 //generates a random string from possible chars
@@ -64,7 +65,7 @@ async function getAccessToken(clientId, code) {
     params.append("client_id", clientId);
     params.append("grant_type", "authorization_code");
     params.append("code", code);
-    params.append("redirect_uri", "http://localhost:5173/callback");
+    params.append("redirect_uri", uri);
     params.append("code_verifier", verifier);
 
     const result = await fetch("https://accounts.spotify.com/api/token", {
