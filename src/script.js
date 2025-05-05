@@ -5,10 +5,11 @@ const uri = "http://127.0.0.1:5173/"; //TODO: figure out why this isn't the usua
 //const refreshCode = l;
 var profile;
 var playlists;
+var tracks;
 var accessToken = await initializeToken();
 console.log("the token is initialized as " + accessToken);
 async function initializeToken() {
-    console.log("code: "+code);
+    console.log("code: " + code);
     if (!code) { //if we don't have an access code, then redirect to grant access
         redirectToAuthCodeFlow(clientId);
     } else { //if we already got access during this session, then 
@@ -31,7 +32,7 @@ async function redirectToAuthCodeFlow(clientId) {
     params.append("client_id", clientId);
     params.append("response_type", "code");
     params.append("redirect_uri", uri);
-    params.append("scope", "user-read-private user-read-email playlist-read-private");
+    params.append("scope", "user-read-private user-read-email playlist-read-private user-top-read");
     params.append("code_challenge_method", "S256");
     params.append("code_challenge", challenge);
     params.append("show_dialog", false);
@@ -97,39 +98,30 @@ async function fetchPlaylists(token) {
 
     return jsonRes;
 }
-async function populatePlaylists(playlists) {
-    const titles = playlists.items
-        .filter(item => item !== null && item.name) //filters out deleted playlists and no-named playlists
-        .map(item => item.name); //creates the array of names
 
-    const ol = document.getElementById("playlist"); //creates a new ordered list entry
-    try {
-        titles.forEach(name => {
-            const li = document.createElement("li");
-            li.textContent = name;
-            li.style.marginLeft = "20px"; //indents
-            li.style.listStyleType = "decimal"; //sets HTML bulleting to be numbered
-            ol.appendChild(li);
-        })
-    } catch (error) {
-        console.log("text is " + li.textContent);
-        console.error("Error:", error);
-        return false;
-    }
-    return true;
+//gets top track information
+async function fetchTracks(token) {
+    const result = await fetch("https://api.spotify.com/v1/me/top/artists/", {
+        method: "GET", headers: { Authorization: `Bearer ${token}` }
+    });
+    const jsonRes = await result.json();
+    if (!jsonRes) { throw new Error("JSON response doesn't exist"); }
+    console.log(jsonRes);
+    return jsonRes;
 }
+
 // async function toggleContent(){
 //     document.getElementById("")
 // }
 export async function loadUserInfo() {
-    if(!accessToken){ //regenerates the access token if it can't find it
+    if (!accessToken) { //regenerates the access token if it can't find it
         accessToken = await initializeToken();
     }
     console.log('loading!!!');
     console.log('I can see the token see look:' + accessToken + "and code too" + code);
-    if(!profile){
+    if (!profile) {
         console.log("grabbing profile info");
-    profile = await fetchProfile(accessToken);
+        profile = await fetchProfile(accessToken);
     }
     //playlists = await fetchPlaylists(accessToken); //not used
 
@@ -137,15 +129,24 @@ export async function loadUserInfo() {
 
 }
 export async function loadPlaylistInfo() {
-    if(!accessToken){ //regenerates the access token if it can't find it
+    if (!accessToken) { //regenerates the access token if it can't find it
         accessToken = await initializeToken();
     }
-    if(!playlists){
-    playlists = await fetchPlaylists(accessToken);
+    if (!playlists) {
+        playlists = await fetchPlaylists(accessToken);
     }
     populatePlaylists(playlists);
 }
 
+export async function loadTrackInfo() {
+    if (!accessToken) { //regenerates the access token if it can't find it
+        accessToken = await initializeToken();
+    }
+    if (!tracks) {
+        tracks = await fetchTracks(accessToken);
+    }
+    populateTracks(tracks);
+}
 //populates the information on the website with the info we found thru the async stuff... again postPlaylists should be more modular
 async function populateUI(profile) {
     console.log(profile);
@@ -163,4 +164,57 @@ async function populateUI(profile) {
     document.getElementById("url").innerText = profile.href;
     document.getElementById("url").setAttribute("href", profile.href);
     //populatePlaylists(playlists); //separate function to get playlist list
+}
+
+async function populatePlaylists(playlists) {
+    const titles = playlists.items
+        .filter(item => item !== null && item.name) //filters out deleted playlists and no-named playlists
+        .map(item => item.name); //creates the array of names
+
+    const ol = document.getElementById("playlist"); //creates a new ordered list entry under the section "playlist" (found in playlist.html)
+    const li = document.createElement("li");
+    titles.forEach(name => {
+        try {
+            const li = document.createElement("li");
+            li.style.marginLeft = "20px"; //indents
+            li.style.listStyleType = "decimal"; //sets HTML bulleting to be numbered
+            li.textContent = name;
+            console.log("appending" + li.textContent);
+            ol.appendChild(li);
+        }
+        catch (error) {
+            console.log("text is " + li.textContent);
+            console.error("Error:", error);
+            return false;
+
+        }
+    });
+
+    return true;
+}
+
+async function populateTracks(tracks) {
+    console.log(tracks);
+    const titles = tracks.items
+        .filter(item => item !== null && item.name) //has a name and exists
+        .map(item => item.name); //creates array
+
+    const ol = document.getElementById("track"); //creates new list under "track" (from track.html)
+    titles.forEach(name => {
+        try {
+            const li = document.createElement("li");
+            li.style.marginLeft = "20px"; //indents
+            li.style.listStyleType = "decimal"; //sets HTML bulleting to be numbered
+            li.textContent = name;
+            console.log("appending" + li.textContent);
+            ol.appendChild(li);
+        }
+        catch (error) {
+            console.log("text is " + li.textContent);
+            console.error("Error:", error);
+            return false;
+
+        }
+    });
+    return true;
 }
