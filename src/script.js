@@ -6,16 +6,14 @@ const uri = "http://127.0.0.1:5173/"; //TODO: figure out why this isn't the usua
 var profile;
 var playlists;
 var tracks;
+var artists;
 var accessToken = await initializeToken();
-console.log("the token is initialized as " + accessToken);
 async function initializeToken() {
-    console.log("code: " + code);
     if (!code) { //if we don't have an access code, then redirect to grant access
         redirectToAuthCodeFlow(clientId);
     } else { //if we already got access during this session, then 
         var token = await getAccessToken(clientId, code);
     }
-    console.log("access token is just gotten and is " + token);
     return token;
 }
 async function refreshToken() {
@@ -36,7 +34,6 @@ async function redirectToAuthCodeFlow(clientId) {
     params.append("code_challenge_method", "S256");
     params.append("code_challenge", challenge);
     params.append("show_dialog", false);
-    console.log(params);
     document.location = `https://accounts.spotify.com/authorize?${params.toString()}`;
 }
 //generates a random string from possible chars
@@ -76,7 +73,6 @@ async function getAccessToken(clientId, code) {
     });
 
     const { access_token } = await result.json();
-    console.log("access token created, its " + access_token);
     return access_token;
 }
 //gets profile information
@@ -85,7 +81,6 @@ async function fetchProfile(token) {
         method: "GET", headers: { Authorization: `Bearer ${token}` }
     });
     console.log(result);
-    console.log("access token has been used and is " + accessToken);
     return await result.json();
 }
 //gets playlist information
@@ -101,6 +96,16 @@ async function fetchPlaylists(token) {
 
 //gets top track information
 async function fetchTracks(token) {
+    const result = await fetch("https://api.spotify.com/v1/me/top/tracks/", {
+        method: "GET", headers: { Authorization: `Bearer ${token}` }
+    });
+    const jsonRes = await result.json();
+    if (!jsonRes) { throw new Error("JSON response doesn't exist"); }
+    console.log(jsonRes);
+    return jsonRes;
+}
+
+async function fetchArtists(token){
     const result = await fetch("https://api.spotify.com/v1/me/top/artists/", {
         method: "GET", headers: { Authorization: `Bearer ${token}` }
     });
@@ -110,24 +115,20 @@ async function fetchTracks(token) {
     return jsonRes;
 }
 
-// async function toggleContent(){
-//     document.getElementById("")
-// }
 export async function loadUserInfo() {
     if (!accessToken) { //regenerates the access token if it can't find it
         accessToken = await initializeToken();
     }
-    console.log('loading!!!');
-    console.log('I can see the token see look:' + accessToken + "and code too" + code);
+
     if (!profile) {
         console.log("grabbing profile info");
         profile = await fetchProfile(accessToken);
     }
-    //playlists = await fetchPlaylists(accessToken); //not used
 
     populateUI(profile);
 
 }
+
 export async function loadPlaylistInfo() {
     if (!accessToken) { //regenerates the access token if it can't find it
         accessToken = await initializeToken();
@@ -146,6 +147,16 @@ export async function loadTrackInfo() {
         tracks = await fetchTracks(accessToken);
     }
     populateTracks(tracks);
+}
+
+export async function loadArtistInfo() {
+    if (!accessToken) { //regenerates the access token if it can't find it
+        accessToken = await initializeToken();
+    }
+    if (!artists) {
+        artists = await fetchArtists(accessToken);
+    }
+    populateTopArtists(artists);
 }
 //populates the information on the website with the info we found thru the async stuff... again postPlaylists should be more modular
 async function populateUI(profile) {
@@ -179,7 +190,6 @@ async function populatePlaylists(playlists) {
             li.style.marginLeft = "20px"; //indents
             li.style.listStyleType = "decimal"; //sets HTML bulleting to be numbered
             li.textContent = name;
-            console.log("appending" + li.textContent);
             ol.appendChild(li);
         }
         catch (error) {
@@ -194,7 +204,6 @@ async function populatePlaylists(playlists) {
 }
 
 async function populateTracks(tracks) {
-    console.log(tracks);
     const titles = tracks.items
         .filter(item => item !== null && item.name) //has a name and exists
         .map(item => item.name); //creates array
@@ -206,7 +215,30 @@ async function populateTracks(tracks) {
             li.style.marginLeft = "20px"; //indents
             li.style.listStyleType = "decimal"; //sets HTML bulleting to be numbered
             li.textContent = name;
-            console.log("appending" + li.textContent);
+            ol.appendChild(li);
+        }
+        catch (error) {
+            console.log("text is " + li.textContent);
+            console.error("Error:", error);
+            return false;
+
+        }
+    });
+    return true;
+}
+
+async function populateTopArtists(artists) {
+    const elements = artists.items
+        .filter(item => item !== null && item.name) //has a name and exists
+        .map(item => item.name); //creates array
+
+    const ol = document.getElementById("top-artists"); //creates new list under "track" (from track.html)
+    elements.forEach(name => {
+        try {
+            const li = document.createElement("li");
+            li.style.marginLeft = "20px"; //indents
+            li.style.listStyleType = "decimal"; //sets HTML bulleting to be numbered
+            li.textContent = name;
             ol.appendChild(li);
         }
         catch (error) {
