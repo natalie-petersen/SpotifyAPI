@@ -5,6 +5,8 @@
     <meta charset="utf-8">
     <title>My Spotify Profile</title>
 
+    <link rel="stylesheet" href="styles.css">
+    <!-- 
     <script>
         function loadContent(page) {
             fetch(page)
@@ -42,23 +44,89 @@
             //     loadContent('home.html');
             // })
         } 
-    </script>
+    </script> -->
+
+
 </head>
 
+<!-- <body>
+                <h1>Spotify Stats</h1>
+                <nav>
+                    <button onclick="loadContent('home.html')">Home</button>
+                    <button onclick="loadContent('playlist.html')">View Recent Playlists</button>
+                    <button onclick="loadContent('track.html')">View Top Tracks</button>
+                    <button onclick="loadContent('artist.html')">View Top Artists</button>
+                </nav>
+                <div id="contentArea" class="content">
+                     loading screen  -->
+<!-- </div>
+<script>
+    loadContent('home.html');
+</script>
+</div> -->
+
 <body>
-    <h1>Spotify Stats</h1>
-    <nav>
-        <button onclick="loadContent('home.html')">Home</button>
-        <button onclick="loadContent('playlist.html')">View Recent Playlists</button>
-        <button onclick="loadContent('track.html')">View Top Tracks</button>
-        <button onclick="loadContent('artist.html')">View Top Artists</button>
-    </nav>
-    <div id="contentArea" class="content">
-        <!-- loading screen  -->
-        Please authorize Spotify to view personalized statistics.
+    <div class="sidebar">
+        <h1>Statistics for Spotify</h1>
+        <ul>
+            <li>
+                <h2><a href="#" onclick="loadContent('home.html')">Home</a></h2>
+            </li>
+            <li>
+                <h2>Discover</h2>
+                <ul>
+                    <li>Recommended Tracks</li>
+                    <li>Recommended Artists</li>
+                </ul>
+            </li>
+            <li>
+                <h2>Library</h2>
+                <ul>
+                    <li><a href="#" onclick="loadContent('track.html')">Recent Playlists</a></li>
+                    <li><a href="#" onclick="loadContent('artist.html')">Top Artists</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+    <div class="main-content" id="main-content">
+        <!-- filled with html from other pages -->
     </div>
     <script>
-        loadContent('home.html');
+        function loadContent(page) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', page, true);
+            console.log(xhr);
+            var newPage = document.getElementById('main-content');
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    document.getElementById('main-content').innerHTML = xhr.responseText;
+                } else {
+                    console.error('Failed to load content');
+                }
+            };
+            const scripts = newPage.querySelectorAll('script');
+            console.log('scripts are ' + scripts.length);
+
+            for (let script of scripts) {
+                const functionName = script.getAttribute('data-function'); // Extract function name from attribute listed in script tag (ie, loadUserInfo in home.html)
+                if (functionName) {
+                    console.log('Executing script in script.js:', script.innerText);
+                    import('./src/script.js').then(module => {
+                        if (module[functionName]) {
+                            module[functionName](); // Call the function dynamically from the module
+                        } else {
+                            console.error(`Function "${functionName}" not found in module.`);
+                        }
+                        //console.log('done executing the script');
+                        //eval(script.innerText.replace('loadUserInfo()', 'module.loadUserInfo()'));
+                    }).catch(error => console.error('error loading module: ', error))
+                }
+                else {
+                    console.warn('No function specified for script:', script.innerText);
+                }
+            }
+            xhr.send();
+        }
     </script>
 </body>
 
