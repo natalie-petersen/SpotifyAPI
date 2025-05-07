@@ -142,6 +142,7 @@ export async function loadPlaylistInfo() {
 export async function loadTrackInfo() {
     if (!accessToken) { //regenerates the access token if it can't find it
         accessToken = await initializeToken();
+        console.log('regenerated token');
     }
     if (!tracks) {
         tracks = await fetchTracks(accessToken);
@@ -231,13 +232,13 @@ async function populateTopArtists(artists) {
     const elements = artists.items
         .filter(item => item !== null && item.name) //has a name and exists
         .map(item => item.name); //creates array
-
-    const ol = document.getElementById("top-artists"); //creates new list under "track" (from track.html)
+    console.log(elements);
+    const ol = document.getElementById("list"); //creates new list under "track" (from track.html)
+    const li = document.createElement("li");
     elements.forEach(name => {
         try {
+            console.log(name);
             const li = document.createElement("li");
-            li.style.marginLeft = "20px"; //indents
-            li.style.listStyleType = "decimal"; //sets HTML bulleting to be numbered
             li.textContent = name;
             ol.appendChild(li);
         }
