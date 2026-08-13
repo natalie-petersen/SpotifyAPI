@@ -1,0 +1,178 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 30px;
+  background: #e6edf6;
+  font-family: "VT323", monospace;
+  font-size: 24px;
+  color: #3f5873;
+}
+
+b {color:#968794;}
+i {color:#a9becb;}
+
+a {
+  color: #555;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #e6edf6;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c7d8ec;
+  border: 2px solid #e6edf6;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d9c4c7;
+}
+
+.container {
+  max-width: 780px;
+  margin: auto;
+  background: #f4f8fd;
+  border: 1px solid #b8cbe0;
+}
+
+.topbar {
+  background: #d4e1f0;
+  padding: 10px 15px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #b8cbe0;
+}
+
+.site-name {
+  font-size: 36px;
+  letter-spacing: 1px;
+}
+
+.links a {
+  color: #4a6a8a;
+  text-decoration: none;
+}
+
+.links a:hover {
+  text-decoration: underline;
+}
+
+
+.main-nav {
+  background: #eef4fb;
+  border-bottom: 1px solid #b8cbe0;
+  padding: 6px 15px;
+  display: flex;
+  gap: 16px;
+  font-size: 24px;
+}
+
+.main-nav a {
+  color: #4a6a8a;
+  text-decoration: none;
+}
+
+.main-nav a:hover {
+  text-decoration: underline;
+}
+
+.main {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+}
+
+.sidebar {
+  width: 220px;
+}
+
+.profile-pic {
+  height: 180px;
+  background: #c7d8ec url(https://files.catbox.moe/vgkskp.gif)
+    center / cover;
+  border: 1px solid #b8cbe0;
+  margin-bottom: 15px;
+}
+
+.box {
+  background: #eef4fb;
+  border: 1px solid #b8cbe0;
+  padding: 10px;
+  margin-bottom: 15px;
+}
+
+.side-title {
+  background: #fff;
+  padding: 2px 0 2px 10px;
+  margin-bottom: 5px;
+  font-size: 32px;
+  border-left: 5px solid #d9c4c7;
+}
+
+.content {
+  flex: 1;
+}
+
+.content-title {
+  background: #d4e1f0;
+  padding: 2px 0 2px 10px;
+  margin-bottom: 5px;
+  font-size: 32px;
+  border-left: 5px solid #d9c4c7;
+}
+
+.footer {
+  background: #eef4fb;
+  border-top: 1px solid #b8cbe0;
+  padding: 8px;
+  text-align: center;
+  font-size: 16px;
+  color: #5f7fa3;
+}
+
+
+@media (max-width: 768px) {
+  .main {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+  }
+
+  
+  .main-nav {
+    flex-direction: column;
+    gap: 8px; 
+    align-items: center;    
+
+  }
+
+  
+  .topbar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+
+  
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+}

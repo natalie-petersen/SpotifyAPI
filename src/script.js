@@ -226,11 +226,15 @@ async function populateTracks(tracks) {
 
         }
     });
-    //makePlaylist(tracks); //UNCOMMENT ME IF YOU WANT TO MAKE A PLAYLIST!!
+    
     return true;
 }
 
-async function makePlaylist(tracks){
+export async function makePlaylist(){
+    if (tracks == null){
+        console.log("NO TRAKCS?");
+        return;
+    }
     const uri = "https://api.spotify.com/v1/me/playlists";
     const data = {
         "name": "PLACEHOLDER",
