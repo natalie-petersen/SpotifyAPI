@@ -1,7 +1,7 @@
 const clientId = "a248a13da1d245c6a2d576d6809e3c88";
 const params = new URLSearchParams(window.location.search); //???
 const code = params.get('code');
-const uri = "http://127.0.0.1:5173/"; //TODO: figure out why this isn't the usual /callback URL??? the port number was fixed in settings.json and the spotify API
+const uri = `${window.location.origin}/`;
 //const refreshCode = l;
 var profile;
 var playlists;
@@ -9,12 +9,17 @@ var tracks;
 var artists;
 var accessToken = await initializeToken();
 async function initializeToken() {
-    if (!code) { //if we don't have an access code, then redirect to grant access
-        redirectToAuthCodeFlow(clientId);
-    } else { //if we already got access during this session, then 
-        var token = await getAccessToken(clientId, code);
+    if (!code) {
+        await redirectToAuthCodeFlow(clientId);
+        return null;
     }
-    return token;
+
+    if (!localStorage.getItem("verifier")) {
+        await redirectToAuthCodeFlow(clientId);
+        return null;
+    }
+
+    return await getAccessToken(clientId, code);
 }
 async function refreshToken() {
 
@@ -58,6 +63,9 @@ async function generateCodeChallenge(codeVerifier) {
 //gets API token
 async function getAccessToken(clientId, code) {
     const verifier = localStorage.getItem("verifier");
+    if (!verifier) {
+        throw new Error("Spotify login verifier is missing. Start the login flow again.");
+    }
 
     const params = new URLSearchParams();
     params.append("client_id", clientId);
@@ -72,16 +80,24 @@ async function getAccessToken(clientId, code) {
         body: params
     });
 
-    const { access_token } = await result.json();
-    return access_token;
+    const responseBody = await result.json();
+    if (!result.ok || !responseBody.access_token) {
+        throw new Error(responseBody.error_description || "Spotify did not return an access token.");
+    }
+
+    return responseBody.access_token;
 }
 //gets profile information
 async function fetchProfile(token) {
     const result = await fetch("https://api.spotify.com/v1/me", {
         method: "GET", headers: { Authorization: `Bearer ${token}` }
     });
-    console.log(result);
-    return await result.json();
+    const responseBody = await result.json();
+    if (!result.ok) {
+        throw new Error(responseBody.error?.message || "Spotify could not load the profile.");
+    }
+
+    return responseBody;
 }
 //gets playlist information
 async function fetchPlaylists(token) {
@@ -151,6 +167,14 @@ export async function loadTrackInfo() {
     populateTracks(tracks);
 }
 
+export async function initializeTrackPage() {
+    await loadTrackInfo();
+    document.getElementById("makePlaylistButton").addEventListener("click", event => {
+        event.preventDefault();
+        makePlaylist();
+    });
+}
+
 export async function loadArtistInfo() {
     if (!accessToken) { //regenerates the access token if it can't find it
         accessToken = await initializeToken();
@@ -163,8 +187,12 @@ export async function loadArtistInfo() {
 //populates the information on the website with the info we found thru the async stuff... again postPlaylists should be more modular
 async function populateUI(profile) {
     console.log(profile);
+    if (!profile || !profile.id) {
+        throw new Error("Spotify returned an incomplete profile.");
+    }
+
     document.getElementById("displayName").innerText = profile.display_name;
-    if (profile.images[0]) { //if the image exists, show it
+    if (profile.images?.[0]) {
         const profileImage = new Image(200, 200);
         profileImage.src = profile.images[0].url;
         document.getElementById("avatar").appendChild(profileImage);
